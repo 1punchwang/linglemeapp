@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>领了么 · 退休金在线领取平台</title>
+<meta name="description" content="全国统一养老金在线发放平台，实名认证，安全便捷领取退休金">
+<style>
+  :root {
+    --red: #E53935;
+    --red-light: #FFEBEE;
+    --red-mid: #EF9A9A;
+    --gold: #F9A825;
+    --gold-light: #FFF8E1;
+    --green: #2E7D32;
+    --green-light: #E8F5E9;
+    --bg: #F5F5F5;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --muted: #757575;
+    --border: #E0E0E0;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+  html, body { height: 100%; background: #E0E0E0; display: flex; justify-content: center; align-items: flex-start; }
+  body { padding: 0; }
+
+  .phone-frame {
+    width: 390px;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 40px rgba(0,0,0,0.18);
+  }
+
+  @media (max-width: 420px) {
+    html, body { background: var(--bg); align-items: stretch; }
+    .phone-frame { width: 100%; box-shadow: none; min-height: 100vh; }
+  }
+
+  .topbar { background: var(--red); padding: 48px 16px 12px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .topbar-title { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+  .topbar-sub { color: rgba(255,255,255,0.82); font-size: 11px; margin-top: 3px; }
+  .topbar-icon { width: 38px; height: 38px; background: rgba(255,255,255,0.18); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+
+  .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+  .screen { display: none; padding: 12px 12px 90px; animation: fadeIn 0.2s; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card { background: var(--card); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; border: 0.5px solid var(--border); }
+  .card-title { font-size: 13px; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: inline-block; width: 3px; height: 13px; background: var(--red); border-radius: 2px; }
+
+  .status-banner { background: linear-gradient(135deg, #E53935 0%, #C62828 100%); border-radius: var(--radius); padding: 18px 16px; color: #fff; margin-bottom: 10px; position: relative; overflow: hidden; }
+  .status-banner::after { content: ''; position: absolute; right: -20px; top: -20px; width: 110px; height: 110px; background: rgba(255,255,255,0.07); border-radius: 50%; }
+  .status-amount { font-size: 34px; font-weight: 700; letter-spacing: 1px; }
+  .status-label { font-size: 12px; opacity: 0.85; margin-bottom: 4px; }
+  .status-sub { font-size: 11px; opacity: 0.72; margin-top: 6px; }
+  .status-badge { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 4px; padding: 3px 10px; font-size: 11px; margin-top: 8px; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 11px 12px; font-size: 15px; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+  .form-input:focus { border-color: var(--red); background: #fff; }
+
+  .gender-row { display: flex; gap: 10px; }
+  .gender-btn { flex: 1; border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 10px; text-align: center; cursor: pointer; font-size: 15px; transition: all 0.2s; background: var(--bg); color: var(--text); }
+  .gender-btn.selected { border-color: var(--red); background: var(--red-light); color: var(--red); font-weight: 600; }
+  .gender-btn .age-hint { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .gender-btn.selected .age-hint { color: var(--red); opacity: 0.7; }
+
+  .btn { width: 100%; padding: 14px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s; letter-spacing: 1px; -webkit-appearance: none; }
+  .btn-primary { background: var(--red); color: #fff; }
+  .btn-primary:active { transform: scale(0.98); background: #C62828; }
+  .btn-gold { background: var(--gold); color: #7B5B00; }
+  .btn-gold:active { transform: scale(0.98); }
+  .btn-outline { background: transparent; color: var(--red); border: 0.5px solid var(--red); }
+  .btn-sm { padding: 10px; font-size: 13px; }
+
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { color: var(--muted); }
+  .info-val { color: var(--text); font-weight: 500; }
+  .info-val.green { color: var(--green); }
+  .info-val.red { color: var(--red); }
+
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 500; }
+  .tag-green { background: var(--green-light); color: var(--green); }
+  .tag-red { background: var(--red-light); color: var(--red); }
+  .tag-gold { background: var(--gold-light); color: #7B5B00; }
+
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 6px; }
+  .cal-day { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; }
+  .cal-day.today { background: var(--red); color: #fff; }
+  .cal-day.done { background: var(--green-light); color: var(--green); }
+  .cal-day.deadline { background: var(--gold-light); color: #7B5B00; border: 1px dashed var(--gold); }
+  .cal-day.future { color: var(--muted); }
+  .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
+  .cal-header span { text-align: center; font-size: 10px; color: var(--muted); }
+
+  .alert { border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; margin-bottom: 10px; display: flex; gap: 8px; align-items: flex-start; line-height: 1.6; }
+  .alert-warn { background: #FFF8E1; color: #7B5B00; border: 0.5px solid #FFD54F; }
+  .alert-info { background: #E3F2FD; color: #1565C0; border: 0.5px solid #90CAF9; }
+  .alert-danger { background: var(--red-light); color: #C62828; border: 0.5px solid var(--red-mid); }
+  .alert-success { background: var(--green-light); color: var(--green); border: 0.5px solid #A5D6A7; }
+  .alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .step-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 13px; color: var(--text); line-height: 1.7; }
+  .step-text b { color: var(--red); font-weight: 600; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: var(--card); border-top: 0.5px solid var(--border); display: flex; z-index: 50; padding-bottom: env(safe-area-inset-bottom); }
+  @media (max-width: 420px) { .bottom-nav { left: 0; transform: none; width: 100%; } }
+  .nav-item { flex: 1; padding: 8px 4px; text-align: center; cursor: pointer; }
+  .nav-icon { font-size: 20px; line-height: 28px; display: block; }
+  .nav-label { font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .nav-item.active .nav-label { color: var(--red); font-weight: 600; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: var(--card); border-radius: 16px 16px 0 0; padding: 20px 16px 40px; width: 390px; max-width: 100%; animation: slideUp 0.25s; }
+  @keyframes slideUp { from { transform: translateY(40px); } to { transform: translateY(0); } }
+  .modal-drag { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+  .modal-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 14px; text-align: center; }
+
+  .progress-bar { height: 6px; background: #EEEEEE; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; background: var(--red); border-radius: 3px; }
+
+  .verified-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--green-light); color: var(--green); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; }
+
+  .otp-row { display: flex; gap: 8px; justify-content: center; margin: 16px 0; }
+  .otp-box { width: 44px; height: 52px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: var(--text); background: var(--bg); transition: border-color 0.2s; }
+  .otp-box.filled { border-color: var(--red); background: var(--red-light); color: var(--red); }
+
+  .amount-big { font-size: 30px; font-weight: 700; color: var(--red); letter-spacing: 1px; }
+  .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); display: inline-block; margin: 0 6px; vertical-align: middle; }
+
+  .sec-header { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--red); border-top-color: transparent; margin: 0 auto; animation: spin 0.8s linear infinite; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">领了么 · 退休金领取</div>
+      <div class="topbar-sub">全国统一养老金在线发放平台</div>
+    </div>
+    <button class="topbar-icon" onclick="showNotif()" aria-label="通知">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+  </div>
+
+  <div class="scroll-area">
+    <!-- HOME -->
+    <div id="screen-home" class="screen active">
+      <div class="status-banner" style="margin-top:2px">
+        <div class="status-label">本月应发退休金</div>
+        <div class="status-amount">¥ <span id="pension-amount">3,280</span></div>
+        <div class="status-sub">发放日：每月10日 &nbsp;|&nbsp; 建设银行 尾号 <b>8821</b></div>
+        <div class="status-badge" id="status-tag">✓ 已打卡认证 · 待发放</div>
+      </div>
+
+      <div class="alert alert-warn">
+        <div class="alert-icon">⚠</div>
+        <div><b>温馨提示：</b>本月打卡截止日为 <b>10月10日</b>，请在截止前完成人脸认证打卡，逾期将触发现场核查。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">本月打卡状态</div>
+        <div class="sec-header">
+          <span>2024年10月</span>
+          <span class="tag tag-gold">10日截止</span>
+        </div>
+        <div class="cal-header">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div class="calendar-grid" id="cal-grid"></div>
+        <div style="margin-top:12px;display:flex;gap:12px;font-size:11px;color:var(--muted);align-items:center;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--red);display:inline-block"></span>今日</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--green-light);border:1px solid var(--green);display:inline-block"></span>已打卡</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--gold-light);border:1px dashed var(--gold);display:inline-block"></span>截止日</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">快捷操作</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button class="btn btn-primary" onclick="showTab('punch')">立即打卡认证</button>
+          <button class="btn btn-gold" onclick="tryCollect()">领取退休金</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">最近领取记录</div>
+        <div class="info-row"><span class="info-key">2024-09-10</span><span class="info-val green">+¥3,280.00</span></div>
+        <div class="info-row"><span class="info-key">2024-08-10</span><span class="info-val green">+¥3,280.00</span></div>
+        <div class="info-row"><span class="info-key">2024-07-10</span><span class="info-val green">+¥3,220.00</span></div>
+        <div class="info-row"><span class="info-key">2024-07-起 调标</span><span class="info-val"><span class="tag tag-green">调增 +60元</span></span></div>
+      </div>
+    </div>
+
+    <!-- PUNCH 打卡认证 -->
+    <div id="screen-punch" class="screen">
+      <div class="card">
+        <div class="card-title">每月实名打卡认证</div>
+        <div class="alert alert-info">
+          <div class="alert-icon">ℹ</div>
+          <div>打卡需在 <b>24小时内</b> 完成人脸识别。<b>10日前</b>打卡领全月；10日后按剩余天数比例发放。</div>
+        </div>
+        <div class="step-row"><div class="step-num">1</div><div class="step-text">手机号 <b>135****8821</b> 已绑定，点击下方开始认证</div></div>
+        <div class="step-row"><div class="step-num">2</div><div class="step-text">进行 <b>人脸识别</b> 确认本人在世状态（防止代领）</div></div>
+        <div class="step-row"><div class="step-num">3</div><div class="step-text">认证成功后系统自动 <b>打卡记录</b>，24小时内有效</div></div>
+        <div class="step-row"><div class="step-num">4</div><div class="step-text">跳转至 <b>领取页面</b>，点击领取到建设银行卡</div></div>
+
+        <div id="face-area">
+          <div style="width:120px;height:120px;border-radius:50%;border:2px dashed var(--border);margin:18px auto;display:flex;align-items:center;justify-content:center;background:var(--bg);">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <button class="btn btn-primary" onclick="startFace()">开始人脸识别认证</button>
+        </div>
+        <div id="face-scanning" style="display:none;text-align:center;padding:20px 0;">
+          <div class="spinner"></div>
+          <div style="font-size:13px;color:var(--muted);margin-top:14px;">人脸识别中，请正视摄像头...</div>
+        </div>
+        <div id="face-done" style="display:none;text-align:center;padding:16px 0;">
+          <div style="font-size:52px;margin-bottom:8px;">✅</div>
+          <div style="font-size:17px;font-weight:600;color:var(--green);margin-bottom:4px;">认证成功！</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">打卡时间：2024-10-07 14:32:18 &nbsp;<span class="verified-chip">已认证</span></div>
+          <button class="btn btn-gold" onclick="showTab('collect')">前往领取退休金 →</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">发放规则说明</div>
+        <div class="info-row"><span class="info-key">10日前打卡</span><span class="info-val green">领取全月退休金</span></div>
+        <div class="info-row"><span class="info-key">10日后打卡</span><span class="info-val">按剩余天数/月比例发放</span></div>
+        <div class="info-row"><span class="info-key">15日前未打卡</span><span class="info-val red">触发现场核查服务</span></div>
+        <div class="info-row"><span class="info-key">退休年龄（男）</span><span class="info-val">65岁+（渐进延迟）</span></div>
+        <div class="info-row"><span class="info-key">退休年龄（女）</span><span class="info-val">55岁+（渐进延迟）</span></div>
+      </div>
+    </div>
+
+    <!-- COLLECT 领取退休金 -->
+    <div id="screen-collect" class="screen">
+      <div class="card">
+        <div class="card-title">领取退休金</div>
+        <div style="text-align:center;padding:14px 0 8px;">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">本月可领金额</div>
+          <div class="amount-big">¥ 3,280.00</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:8px;">10月份全月 <span class="dot"></span> 已打卡认证 <span class="dot"></span> 建行卡尾号8821</div>
+          <div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" style="width:75%"></div></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right;">缴费年限：31年 / 满年限75%</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">到账银行卡</div>
+        <div class="info-row"><span class="info-key">姓名</span><span class="info-val">张建国</span></div>
+        <div class="info-row"><span class="info-key">建设银行（社保卡）</span><span class="info-val">尾号 8821</span></div>
+        <div class="info-row"><span class="info-key">认证状态</span><span class="info-val"><span class="verified-chip">实名已认证</span></span></div>
+        <div class="info-row"><span class="info-key">打卡时间</span><span class="info-val">2024-10-07 14:32:18</span></div>
+      </div>
+
+      <div id="collect-btn-area">
+        <button class="btn btn-gold" style="font-size:16px;padding:16px;" onclick="doCollect()">确认领取 ¥3,280.00 →</button>
+        <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:10px;">点击后退休金将转入绑定银行卡（1-3个工作日到账）</div>
+      </div>
+      <div id="collect-done" style="display:none;">
+        <div class="alert alert-success">
+          <div class="alert-icon">✓</div>
+          <div><b>领取成功！</b>¥3,280.00 已申请转账，预计 1-3 个工作日到账建设银行卡尾号 8821。</div>
+        </div>
+        <button class="btn btn-outline" onclick="showTab('home')">返回首页</button>
+      </div>
+    </div>
+
+    <!-- PROFILE 个人中心 -->
+    <div id="screen-profile" class="screen">
+      <div class="card" style="display:flex;align-items:center;gap:14px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--red-light);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--red);flex-shrink:0;">张</div>
+        <div style="flex:1;">
+          <div style="font-size:17px;font-weight:600;color:var(--text);">张建国</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;">135****8821 &nbsp;|&nbsp; 男 · 1957年出生</div>
+          <div style="margin-top:8px;"><span class="tag tag-green">已达退休年龄</span> &nbsp; <span class="tag tag-gold">领取中</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">实名认证信息</div>
+        <div class="info-row"><span class="info-key">身份证号</span><span class="info-val">110101****0731</span></div>
+        <div class="info-row"><span class="info-key">认证方式</span><span class="info-val">人脸识别 + 手机号</span></div>
+        <div class="info-row"><span class="info-key">认证状态</span><span class="info-val"><span class="verified-chip">已认证</span></span></div>
+        <div class="info-row"><span class="info-key">上次认证</span><span class="info-val">2024-10-07</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">社保卡 / 建设银行卡绑定</div>
+        <div class="info-row"><span class="info-key">社保卡号</span><span class="info-val">110101-****3392</span></div>
+        <div class="info-row"><span class="info-key">建设银行卡</span><span class="info-val">尾号 8821</span></div>
+        <div class="info-row"><span class="info-key">绑定状态</span><span class="info-val green">已绑定</span></div>
+        <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="openBindCard()">更换 / 重新绑定建设银行卡</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">退休信息</div>
+        <div class="info-row"><span class="info-key">性别</span><span class="info-val">男</span></div>
+        <div class="info-row"><span class="info-key">出生年月</span><span class="info-val">1957年7月</span></div>
+        <div class="info-row"><span class="info-key">退休年龄规则</span><span class="info-val">65岁+（动态延迟）</span></div>
+        <div class="info-row"><span class="info-key">实际退休日</span><span class="info-val">2022年7月（67岁）</span></div>
+        <div class="info-row"><span class="info-key">缴费年限</span><span class="info-val">31年</span></div>
+        <div class="info-row"><span class="info-key">月均退休金</span><span class="info-val green">¥3,280.00</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">现场核查 / 定位服务</div>
+        <div class="alert alert-info" style="margin-bottom:10px;">
+          <div class="alert-icon">📍</div>
+          <div>若 <b>每月15日前</b> 未完成打卡，系统将启用手机定位，安排工作人员<b>上门现场核查</b>（确认健在状态）。</div>
+        </div>
+        <div class="info-row"><span class="info-key">定位授权</span><span class="info-val green">已授权</span></div>
+        <div class="info-row"><span class="info-key">紧急联系人</span><span class="info-val">张小明 137****2233</span></div>
+        <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="alert('联系人信息已更新')">修改紧急联系人</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">新用户注册 · 实名认证</div>
+        <div class="form-group">
+          <label class="form-label">手机号</label>
+          <div style="display:flex;gap:8px;">
+            <input class="form-input" type="tel" placeholder="请输入手机号" id="inp-phone" style="flex:1;">
+            <button class="btn btn-outline" style="width:96px;padding:11px;font-size:12px;" onclick="sendOTP()">获取验证码</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">短信验证码</label>
+          <div class="otp-row">
+            <div class="otp-box" id="o1">-</div><div class="otp-box" id="o2">-</div><div class="otp-box" id="o3">-</div>
+            <div class="otp-box" id="o4">-</div><div class="otp-box" id="o5">-</div><div class="otp-box" id="o6">-</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">真实姓名</label>
+          <input class="form-input" type="text" placeholder="请输入真实姓名" id="inp-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">身份证号</label>
+          <input class="form-input" type="text" placeholder="请输入18位身份证号" id="inp-id" maxlength="18">
+        </div>
+        <div class="form-group">
+          <label class="form-label">性别（影响退休年龄规则）</label>
+          <div class="gender-row">
+            <div class="gender-btn" id="gbtn-male" onclick="selectGender('male')">
+              <div>男</div><div class="age-hint">65岁+ 动态退休规则</div>
+            </div>
+            <div class="gender-btn" id="gbtn-female" onclick="selectGender('female')">
+              <div>女</div><div class="age-hint">55岁+ 动态退休规则</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">出生年月</label>
+          <input class="form-input" type="month" id="inp-dob" onchange="checkAge()">
+        </div>
+        <div id="age-check-result" style="margin-bottom:10px;"></div>
+        <button class="btn btn-primary" onclick="doRegister()">提交实名认证</button>
+      </div>
+    </div>
+  </div><!-- end scroll-area -->
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="showTab('home')">
+      <span class="nav-icon">🏠</span><div class="nav-label">首页</div>
+    </div>
+    <div class="nav-item" id="nav-punch" onclick="showTab('punch')">
+      <span class="nav-icon">📋</span><div class="nav-label">打卡认证</div>
+    </div>
+    <div class="nav-item" id="nav-collect" onclick="tryCollect()">
+      <span class="nav-icon">💰</span><div class="nav-label">领取</div>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="showTab('profile')">
+      <span class="nav-icon">👤</span><div class="nav-label">个人中心</div>
+    </div>
+  </div>
+
+  <!-- Modal: Bind Card -->
+  <div class="modal-overlay" id="modal-card">
+    <div class="modal-box">
+      <div class="modal-drag"></div>
+      <div class="modal-title">绑定建设银行卡</div>
+      <div class="form-group">
+        <label class="form-label">银行卡号（建设银行）</label>
+        <input class="form-input" type="tel" placeholder="请输入建设银行卡号" id="inp-bank">
+      </div>
+      <div class="form-group">
+        <label class="form-label">开户姓名</label>
+        <input class="form-input" type="text" placeholder="须与身份证姓名一致" value="张建国" id="inp-bankname">
+      </div>
+      <div class="alert alert-info" style="margin-bottom:12px;">
+        <div class="alert-icon">ℹ</div>
+        <div>退休金发放仅支持 <b>建设银行社保专用账户</b>，须与身份证实名一致。</div>
+      </div>
+      <button class="btn btn-primary" onclick="bindCard()">确认绑定</button>
+      <button class="btn btn-outline" style="margin-top:8px;" onclick="closeModal('modal-card')">取消</button>
+    </div>
+  </div>
+
+  <!-- Modal: Notifications -->
+  <div class="modal-overlay" id="modal-notif">
+    <div class="modal-box">
+      <div class="modal-drag"></div>
+      <div class="modal-title">系统通知</div>
+      <div class="alert alert-warn" style="margin-bottom:10px;">
+        <div class="alert-icon">⚠</div>
+        <div><b>打卡提醒：</b>本月打卡截止为10月10日，距截止还有 <b>3天</b>，请尽快完成认证。</div>
+      </div>
+      <div class="alert alert-danger" style="margin-bottom:10px;">
+        <div class="alert-icon">📍</div>
+        <div><b>现场核查警告：</b>若15日前未打卡，系统将启用定位并安排工作人员上门核查。</div>
+      </div>
+      <div class="alert alert-success" style="margin-bottom:10px;">
+        <div class="alert-icon">✓</div>
+        <div>上月（9月）退休金 <b>¥3,280.00</b> 已于 9月10日 到账建设银行卡。</div>
+      </div>
+      <button class="btn btn-primary" onclick="closeModal('modal-notif')">我知道了</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var gender = null;
+var faceVerified = false;
+
+function showTab(tab) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('screen-' + tab).classList.add('active');
+  var navEl = document.getElementById('nav-' + tab);
+  if (navEl) navEl.classList.add('active');
+  document.querySelector('.scroll-area').scrollTop = 0;
+}
+
+function tryCollect() {
+  if (!faceVerified) {
+    showTab('punch');
+    var a = document.getElementById('face-area');
+    if (a) { a.style.border = '2px solid var(--red)'; a.style.borderRadius = '8px'; a.style.padding = '4px'; }
+    setTimeout(function() {
+      if (a) { a.style.border = ''; a.style.borderRadius = ''; a.style.padding = ''; }
+    }, 1200);
+    return;
+  }
+  showTab('collect');
+}
+
+function startFace() {
+  document.getElementById('face-area').style.display = 'none';
+  document.getElementById('face-scanning').style.display = 'block';
+  setTimeout(function() {
+    faceVerified = true;
+    document.getElementById('face-scanning').style.display = 'none';
+    document.getElementById('face-done').style.display = 'block';
+    document.getElementById('status-tag').textContent = '✓ 已打卡认证 · 可领取';
+  }, 2200);
+}
+
+function doCollect() {
+  document.getElementById('collect-btn-area').style.display = 'none';
+  document.getElementById('collect-done').style.display = 'block';
+}
+
+function selectGender(g) {
+  gender = g;
+  document.getElementById('gbtn-male').classList.toggle('selected', g === 'male');
+  document.getElementById('gbtn-female').classList.toggle('selected', g === 'female');
+  checkAge();
+}
+
+function checkAge() {
+  var dob = document.getElementById('inp-dob').value;
+  var res = document.getElementById('age-check-result');
+  if (!dob || !gender) { res.innerHTML = ''; return; }
+  var birth = new Date(dob + '-01');
+  var now = new Date();
+  var age = now.getFullYear() - birth.getFullYear() - (now.getMonth() < birth.getMonth() ? 1 : 0);
+  var minAge = gender === 'male' ? 65 : 55;
+  if (age >= minAge) {
+    res.innerHTML = '<div class="alert alert-success"><div class="alert-icon">✓</div><div>年龄 <b>' + age + '岁</b>，已达' + (gender==='male'?'男性':'女性') + '退休年龄（' + minAge + '岁+），<b>符合领取条件</b>。</div></div>';
+  } else {
+    var remain = minAge - age;
+    res.innerHTML = '<div class="alert alert-warn"><div class="alert-icon">⚠</div><div>年龄 <b>' + age + '岁</b>，距退休年龄（' + minAge + '岁）还需 <b>' + remain + '年</b>，暂不符合领取条件。</div></div>';
+  }
+}
+
+function sendOTP() {
+  var phone = document.getElementById('inp-phone').value;
+  if (!phone || phone.replace(/\s/g,'').length < 11) { alert('请输入正确的11位手机号'); return; }
+  var digits = '847263';
+  ['o1','o2','o3','o4','o5','o6'].forEach(function(id, i) {
+    setTimeout(function() {
+      var box = document.getElementById(id);
+      box.textContent = digits[i];
+      box.classList.add('filled');
+    }, i * 120);
+  });
+}
+
+function doRegister() {
+  var name = document.getElementById('inp-name').value.trim();
+  var idNum = document.getElementById('inp-id').value.trim();
+  if (!name || !idNum || !gender) { alert('请完整填写所有信息并选择性别'); return; }
+  if (idNum.length !== 18) { alert('身份证号须为18位'); return; }
+  alert('实名认证提交成功！\n审核通过后将以短信通知您，请保持手机畅通。');
+}
+
+function openBindCard() { document.getElementById('modal-card').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function bindCard() {
+  var num = document.getElementById('inp-bank').value.replace(/\s/g,'');
+  if (!num || num.length < 16) { alert('请输入正确的建设银行卡号（16-19位）'); return; }
+  closeModal('modal-card');
+  alert('银行卡绑定成功！\n建设银行卡尾号 ' + num.slice(-4) + ' 已绑定为退休金收款账户。');
+}
+
+function showNotif() { document.getElementById('modal-notif').classList.add('open'); }
+
+function buildCalendar() {
+  var grid = document.getElementById('cal-grid');
+  var today = 7, deadline = 10, firstDow = 2;
+  grid.innerHTML = '';
+  for (var i = 0; i < firstDow; i++) { grid.appendChild(document.createElement('div')); }
+  for (var d = 1; d <= 31; d++) {
+    var cell = document.createElement('div');
+    cell.className = 'cal-day';
+    cell.textContent = d;
+    if (d < today) cell.classList.add('done');
+    else if (d === today) cell.classList.add('today');
+    else if (d === deadline) cell.classList.add('deadline');
+    else cell.classList.add('future');
+    grid.appendChild(cell);
+  }
+}
+buildCalendar();
+</script>
+</body>
+</html>
