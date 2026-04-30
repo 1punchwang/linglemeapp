@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>领了么 · 退休金在线领取平台</title>
+<meta name="description" content="全国统一养老金在线发放平台，实名认证，安全便捷领取退休金">
+<style>
+  :root {
+    --red: #E53935;
+    --red-light: #FFEBEE;
+    --red-mid: #EF9A9A;
+    --gold: #F9A825;
+    --gold-light: #FFF8E1;
+    --green: #2E7D32;
+    --green-light: #E8F5E9;
+    --bg: #F5F5F5;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --muted: #757575;
+    --border: #E0E0E0;
+    --radius: 12px;
+    --radius-sm: 8px;
+    /* 标准版基础尺寸 */
+    --font-sm: 11px;
+    --font-base: 13px;
+    --font-lg: 15px;
+    --font-xl: 18px;
+    --btn-padding: 14px;
+    --card-padding: 14px 16px;
+    --gap: 10px;
+  }
+  /* 🔥 敬老版：字体/按钮/间距全面放大 */
+  .phone-frame.elderly {
+    --font-sm: 14px;
+    --font-base: 16px;
+    --font-lg: 18px;
+    --font-xl: 22px;
+    --btn-padding: 18px;
+    --card-padding: 20px;
+    --gap: 16px;
+    --radius: 16px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+  html, body { height: 100%; background: #E0E0E0; display: flex; justify-content: center; align-items: flex-start; }
+  body { padding: 0; }
+
+  .phone-frame {
+    width: 390px;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 40px rgba(0,0,0,0.18);
+    transition: all 0.3s;
+  }
+
+  @media (max-width: 420px) {
+    html, body { background: var(--bg); align-items: stretch; }
+    .phone-frame { width: 100%; box-shadow: none; min-height: 100vh; }
+  }
+
+  /* 🔥 五一劳动节·农工商背景装饰（黑白红） */
+  .labor-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.08;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><path d="M20 80V60L30 55L40 60V80M30 40V20M60 80V60L70 55L80 60V80M70 40V20M45 90V70L50 65L55 70V90" stroke="black" stroke-width="2"/><circle cx="30" cy="15" r="5" fill="red"/><circle cx="70" cy="15" r="5" fill="red"/></svg>') repeat;
+  }
+
+  .topbar { background: var(--red); padding: 48px 16px 12px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; position: relative; z-index: 1; }
+  .topbar-title { color: #fff; font-size: var(--font-xl); font-weight: 700; letter-spacing: 1px; }
+  .topbar-sub { color: rgba(255,255,255,0.82); font-size: var(--font-sm); margin-top: 3px; }
+  .topbar-icon { width: 38px; height: 38px; background: rgba(255,255,255,0.18); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+  .phone-frame.elderly .topbar-icon { width: 48px; height: 48px; }
+
+  /* 敬老版切换按钮 */
+  .elder-switch {
+    margin: 8px 12px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+  .switch-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: var(--font-base);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .switch-btn.active {
+    background: var(--red);
+    color: #fff;
+  }
+  .switch-btn:not(.active) {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .phone-frame.elderly .switch-btn { padding: 14px; font-size: var(--font-lg); }
+
+  /* 顶部祝福横幅 */
+  .bless-banner {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 390px;
+    background: linear-gradient(90deg, var(--gold), var(--red));
+    color: #fff;
+    text-align: center;
+    padding: 8px 16px;
+    font-size: var(--font-base);
+    font-weight: 600;
+    z-index: 999;
+    display: none;
+    animation: slideDown 0.3s ease-out;
+  }
+  @media (max-width: 420px) { .bless-banner { width: 100%; left: 0; transform: none; } }
+  @keyframes slideDown {
+    from { top: -40px; opacity: 0; }
+    to { top: 0; opacity: 1; }
+  }
+
+  /* 🔥 随机弹幕样式 */
+  .danmu-container {
+    position: absolute;
+    top: 120px;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    pointer-events: none;
+    z-index: 10;
+    overflow: hidden;
+  }
+  .danmu {
+    position: absolute;
+    white-space: nowrap;
+    color: var(--red);
+    font-size: var(--font-lg);
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    animation: danmuSlide 8s linear forwards;
+  }
+  @keyframes danmuSlide {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-120%); }
+  }
+
+  .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; z-index: 1; }
+
+  .screen { display: none; padding: 12px 12px 90px; animation: fadeIn 0.2s; position: relative; z-index: 1; }
+  .screen.active { display: block; }
+  .phone-frame.elderly .screen { padding: 16px 16px 100px; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* 🔥 登录页样式（黑白红·农工商主题） */
+  .login-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 40px 20px;
+    background: linear-gradient(180deg, #000 0%, #222 100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+  }
+  /* 关键修复：增强hidden类的优先级 */
+  .login-screen.hidden {
+    display: none !important;
+  }
+  .login-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .login-sub {
+    font-size: var(--font-base);
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 60px;
+  }
+  .login-form {
+    width: 100%;
+    max-width: 320px;
+  }
+  .login-input {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    color: #fff;
+    font-size: var(--font-lg);
+    margin-bottom: 20px;
+    outline: none;
+  }
+  .login-input::placeholder { color: rgba(255,255,255,0.5); }
+  .login-btn {
+    width: 100%;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-size: var(--font-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .login-btn:active {
+    background: #c62828;
+    transform: scale(0.98);
+  }
+  .login-desc {
+    font-size: var(--font-sm);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .card { 
+    background: var(--card); 
+    border-radius: var(--radius); 
+    padding: var(--card-padding); 
+    margin-bottom: var(--gap); 
+    border: 0.5px solid var(--border); 
+    position: relative;
+    z-index: 1;
+  }
+  .card-title { 
+    font-size: var(--font-base); 
+    color: var(--muted); 
+    margin-bottom: var(--gap); 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+  }
+  .card-title::before { content: ''; display: inline-block; width: 3px; height: 14px; background: var(--red); border-radius: 2px; }
+
+  .status-banner { background: linear-gradient(135deg, #E53935 0%, #C62828 100%); border-radius: var(--radius); padding: 18px 16px; color: #fff; margin-bottom: var(--gap); position: relative; overflow: hidden; z-index: 1; }
+  .phone-frame.elderly .status-banner { padding: 24px; }
+  .status-banner::after { content: ''; position: absolute; right: -20px; top: -20px; width: 110px; height: 110px; background: rgba(255,255,255,0.07); border-radius: 50%; }
+  .status-amount { font-size: 34px; font-weight: 700; letter-spacing: 1px; }
+  .phone-frame.elderly .status-amount { font-size: 42px; }
+  .status-label { font-size: var(--font-base); opacity: 0.85; margin-bottom: 4px; }
+  .status-sub { font-size: var(--font-sm); opacity: 0.72; margin-top: 6px; }
+  .status-badge { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 4px; padding: 3px 10px; font-size: var(--font-sm); margin-top: 8px; }
+
+  .form-group { margin-bottom: var(--gap); }
+  .form-label { font-size: var(--font-base); color: var(--muted); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 11px 12px; font-size: var(--font-lg); color: var(--text); background: var(--bg); outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+  .phone-frame.elderly .form-input { padding: 16px; font-size: var(--font-xl); }
+  .form-input:focus { border-color: var(--red); background: #fff; }
+
+  .gender-row { display: flex; gap: var(--gap); }
+  .gender-btn { flex: 1; border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 10px; text-align: center; cursor: pointer; font-size: var(--font-lg); transition: all 0.2s; background: var(--bg); color: var(--text); }
+  .phone-frame.elderly .gender-btn { padding: 18px; font-size: var(--font-xl); }
+  .gender-btn.selected { border-color: var(--red); background: var(--red-light); color: var(--red); font-weight: 600; }
+  .gender-btn .age-hint { font-size: var(--font-sm); color: var(--muted); margin-top: 3px; }
+  .gender-btn.selected .age-hint { color: var(--red); opacity: 0.7; }
+
+  .btn { 
+    width: 100%; 
+    padding: var(--btn-padding); 
+    border-radius: var(--radius-sm); 
+    font-size: var(--font-lg); 
+    font-weight: 600; 
+    border: none; 
+    cursor: pointer; 
+    transition: all 0.15s; 
+    letter-spacing: 1px; 
+    -webkit-appearance: none; 
+  }
+  .btn-primary { background: var(--red); color: #fff; }
+  .btn-primary:active { transform: scale(0.98); background: #C62828; }
+  .btn-gold { background: var(--gold); color: #7B5B00; }
+  .btn-gold:active { transform: scale(0.98); }
+  .btn-outline { background: transparent; color: var(--red); border: 0.5px solid var(--red); }
+  .btn-sm { padding: 10px; font-size: var(--font-base); }
+  /* 月份切换按钮 */
+  .month-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .phone-frame.elderly .month-btn { width: 40px; height: 40px; font-size: 18px; }
+
+  .info-row { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 10px 0; 
+    border-bottom: 0.5px solid var(--border); 
+    font-size: var(--font-base); 
+  }
+  .phone-frame.elderly .info-row { padding: 14px 0; font-size: var(--font-lg); }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { color: var(--muted); }
+  .info-val { color: var(--text); font-weight: 500; }
+  .info-val.green { color: var(--green); }
+  .info-val.red { color: var(--red); }
+
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: var(--font-sm); font-weight: 500; }
+  .tag-green { background: var(--green-light); color: var(--green); }
+  .tag-red { background: var(--red-light); color: var(--red); }
+  .tag-gold { background: var(--gold-light); color: #7B5B00; }
+
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 6px; }
+  .cal-day { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: var(--font-base); font-weight: 500; }
+  .phone-frame.elderly .cal-day { font-size: var(--font-lg); }
+  .cal-day.today { background: var(--red); color: #fff; }
+  .cal-day.done { background: var(--green-light); color: var(--green); }
+  .cal-day.deadline { background: var(--gold-light); color: #7B5B00; border: 1px dashed var(--gold); }
+  .cal-day.future { color: var(--muted); }
+  .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
+  .cal-header span { text-align: center; font-size: var(--font-sm); color: var(--muted); }
+  .phone-frame.elderly .cal-header span { font-size: var(--font-base); }
+
+  .alert { border-radius: var(--radius-sm); padding: 10px 12px; font-size: var(--font-base); margin-bottom: var(--gap); display: flex; gap: 8px; align-items: flex-start; line-height: 1.6; }
+  .phone-frame.elderly .alert { padding: 16px; font-size: var(--font-lg); }
+  .alert-warn { background: #FFF8E1; color: #7B5B00; border: 0.5px solid #FFD54F; }
+  .alert-info { background: #E3F2FD; color: #1565C0; border: 0.5px solid #90CAF9; }
+  .alert-danger { background: var(--red-light); color: #C62828; border: 0.5px solid var(--red-mid); }
+  .alert-success { background: var(--green-light); color: var(--green); border: 0.5px solid #A5D6A7; }
+  .alert-icon { font-size: var(--font-lg); flex-shrink: 0; margin-top: 1px; }
+
+  .step-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+  .phone-frame.elderly .step-row { gap: 14px; margin-bottom: 16px; }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .phone-frame.elderly .step-num { width: 28px; height: 28px; font-size: 14px; }
+  .step-text { font-size: var(--font-base); color: var(--text); line-height: 1.7; }
+  .phone-frame.elderly .step-text { font-size: var(--font-lg); }
+  .step-text b { color: var(--red); font-weight: 600; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: var(--card); border-top: 0.5px solid var(--border); display: flex; z-index: 50; padding-bottom: env(safe-area-inset-bottom); }
+  @media (max-width: 420px) { .bottom-nav { left: 0; transform: none; width: 100%; } }
+  .nav-item { flex: 1; padding: 8px 4px; text-align: center; cursor: pointer; }
+  .phone-frame.elderly .nav-item { padding: 12px 4px; }
+  .nav-icon { font-size: 20px; line-height: 28px; display: block; }
+  .phone-frame.elderly .nav-icon { font-size: 26px; line-height: 32px; }
+  .nav-label { font-size: var(--font-sm); color: var(--muted); margin-top: 1px; }
+  .phone-frame.elderly .nav-label { font-size: var(--font-base); }
+  .nav-item.active .nav-label { color: var(--red); font-weight: 600; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: var(--card); border-radius: 16px 16px 0 0; padding: 20px 16px 40px; width: 390px; max-width: 100%; animation: slideUp 0.25s; }
+  @keyframes slideUp { from { transform: translateY(40px); } to { transform: translateY(0); } }
+  .modal-drag { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+  .modal-title { font-size: var(--font-xl); font-weight: 600; color: var(--text); margin-bottom: 14px; text-align: center; }
+
+  .progress-bar { height: 6px; background: #EEEEEE; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .phone-frame.elderly .progress-bar { height: 8px; }
+  .progress-fill { height: 100%; background: var(--red); border-radius: 3px; }
+
+  .verified-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--green-light); color: var(--green); font-size: var(--font-sm); font-weight: 600; padding: 3px 10px; border-radius: 100px; }
+
+  .otp-row { display: flex; gap: 8px; justify-content: center; margin: 16px 0; }
+  .otp-box { width: 44px; height: 52px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: var(--text); background: var(--bg); transition: border-color 0.2s; }
+  .phone-frame.elderly .otp-box { width: 54px; height: 62px; font-size: 26px; }
+  .otp-box.filled { border-color: var(--red); background: var(--red-light); color: var(--red); }
+
+  .amount-big { font-size: 30px; font-weight: 700; color: var(--red); letter-spacing: 1px; }
+  .phone-frame.elderly .amount-big { font-size: 38px; }
+  .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); display: inline-block; margin: 0 6px; vertical-align: middle; }
+
+  .sec-header { font-size: var(--font-lg); font-weight: 600; color: var(--text); margin-bottom: var(--gap); display: flex; align-items: center; justify-content: space-between; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--red); border-top-color: transparent; margin: 0 auto; animation: spin 0.8s linear infinite; }
+
+  /* 退休金模拟器样式 */
+  .simulator-result {
+    text-align: center;
+    padding: 20px 0;
+    margin: 10px 0;
+    background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+    border-radius: var(--radius);
+    border: 1px solid var(--gold);
+  }
+  .simulator-result h3 {
+    font-size: var(--font-lg);
+    color: #7B5B00;
+    margin-bottom: 10px;
+  }
+  .simulator-amount {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .phone-frame.elderly .simulator-amount { font-size: 40px; }
+  .simulator-note {
+    font-size: var(--font-sm);
+    color: #7B5B00;
+    opacity: 0.8;
+  }
+
+  /* 庆祝动画+首页持续金币掉落 */
+  .celebration-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+  }
+  .celebration-container.active {
+    display: block;
+  }
+  /* 金币飘落 */
+  .coin {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: gold;
+    border-radius: 50%;
+    animation: fall linear forwards, rotate 1s linear infinite;
+    opacity: 0;
+  }
+  .coin::before {
+    content: '¥';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #7B5B00;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-50px); opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+  }
+  @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  /* 烟花效果 */
+  .firework {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    animation: explode 1s ease-out forwards;
+    opacity: 0;
+  }
+  @keyframes explode { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(50); opacity: 0; } }
+  /* 数字跳动动画 */
+  @keyframes countUp { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+  .count-up { animation: countUp 0.5s ease-out forwards; }
+
+  /* 生活缴费模块样式 */
+  .bill-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap);
+    margin-top: 8px;
+  }
+  .phone-frame.elderly .bill-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .bill-item {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .phone-frame.elderly .bill-item { padding: 24px 12px; }
+  .bill-item:active { transform: scale(0.96); background: var(--red-light); }
+  .bill-icon { font-size: 24px; margin-bottom: 6px; }
+  .phone-frame.elderly .bill-icon { font-size: 30px; }
+  .bill-text { font-size: var(--font-sm); color: var(--text); font-weight: 500; }
+  .phone-frame.elderly .bill-text { font-size: var(--font-base); }
+  .bill-action {
+    font-size: 10px;
+    color: var(--red);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .phone-frame.elderly .bill-action { font-size: 12px; }
+  
+  /* 缴费机构选择页面样式 */
+  .bill-detail-screen {
+    display: none;
+    padding: 12px 12px 90px;
+    animation: fadeIn 0.2s;
+    position: relative;
+    z-index: 1;
+  }
+  .bill-detail-screen.active {
+    display: block;
+  }
+  .bill-detail-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--gap);
+  }
+  .back-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  .bill-detail-title {
+    font-size: var(--font-xl);
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+  .institution-list {
+    margin-top: 10px;
+  }
+  .institution-item {
+    padding: 12px 16px;
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+  .institution-name {
+    font-size: var(--font-base);
+    color: var(--text);
+    font-weight: 500;
+  }
+  .institution-select {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .institution-select.selected {
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .institution-select.selected::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+  }
+  .bill-order-list {
+    margin-top: 10px;
+  }
+  .bill-order-item {
+    padding: 12px 16px;
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .bill-order-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .bill-order-date {
+    font-size: var(--font-sm);
+    color: var(--muted);
+  }
+  .bill-order-status {
+    font-size: var(--font-sm);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .status-paid {
+    background: var(--green-light);
+    color: var(--green);
+  }
+  .status-unpaid {
+    background: var(--red-light);
+    color: var(--red);
+  }
+  .bill-order-amount {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .bill-order-desc {
+    font-size: var(--font-sm);
+    color: var(--muted);
+  }
+  
+  /* 登录加载提示 */
+  .login-loading {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+    color: rgba(255,255,255,0.8);
+  }
+  .login-loading span {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    margin: 0 2px;
+    animation: loading 1s infinite alternate;
+  }
+  .login-loading span:nth-child(2) { animation-delay: 0.2s; }
+  .login-loading span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes loading {
+    from { opacity: 0.3; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1.2); }
+  }
+  
+  /* 隐藏元素样式 */
+  .hidden {
+    display: none !important;
+  }
+</style>
+</head>
+<body>
+<!-- 🔥 五一劳动节·农工商背景装饰 -->
+<div class="labor-bg"></div>
+<!-- 顶部祝福横幅 -->
+<div class="bless-banner" id="bless-banner"></div>
+<!-- 🔥 随机弹幕容器 -->
+<div class="danmu-container" id="danmu-container"></div>
+
+<div class="phone-frame" id="main-frame">
+  <!-- 🔥 登录页（默认显示） -->
+  <div id="screen-login" class="login-screen">
+    <h1 class="login-title">领了么</h1>
+    <p class="login-sub">退休金在线领取平台</p>
+    <div class="login-form">
+      <input type="tel" id="login-phone" class="login-input" placeholder="请输入手机号" maxlength="11">
+      <button class="login-btn" onclick="userLogin()">立即登录</button>
+      <div class="login-loading" id="login-loading">
+        <span></span><span></span><span></span>
+        <p style="margin-top:8px;font-size:12px;">正在登录...</p>
+      </div>
+      <p class="login-desc">未注册手机号将自动注册，本平台为演示系统</p>
+    </div>
+  </div>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">领了么 · 退休金领取</div>
+      <div class="topbar-sub">全国统一养老金在线发放平台</div>
+    </div>
+    <button class="topbar-icon" onclick="showNotif()" aria-label="通知">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 20 0 0 1-3.46 0"/></svg>
+    </button>
+  </div>
+
+  <div class="scroll-area">
+    <!-- HOME 首页 -->
+    <div id="screen-home" class="screen">
+      <div class="status-banner" style="margin-top:2px">
+        <div class="status-label">本月应发退休金</div>
+        <div class="status-amount">¥ <span id="pension-amount">3,280</span></div>
+        <div class="status-sub">发放日：每月10日 &nbsp;|&nbsp; 建设银行 尾号 <b>8821</b></div>
+        <div class="status-badge" id="status-tag">✓ 已打卡认证 · 待发放</div>
+      </div>
+
+      <!-- 敬老版/标准版切换 -->
+      <div class="elder-switch">
+        <button class="switch-btn active" id="btn-normal" onclick="toggleElderly(false)">标准版</button>
+        <button class="switch-btn" id="btn-elderly" onclick="toggleElderly(true)">敬老版</button>
+      </div>
+
+      <!-- 虚假信息提示 -->
+      <div class="alert alert-warn">
+        <div class="alert-icon">⚠</div>
+        <div><b>温馨提示：</b>本平台为演示系统，<b>请填写虚假银行卡号、虚假身份证号（年份早于1960年）</b>，切勿填写真实个人信息！</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">本月打卡状态</div>
+        <div class="sec-header">
+          <button class="month-btn" onclick="prevMonth()">←</button>
+          <span id="current-month">2026年05月</span>
+          <button class="month-btn" onclick="nextMonth()">→</button>
+          <span class="tag tag-gold">10日截止</span>
+        </div>
+        <div class="cal-header">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div class="calendar-grid" id="cal-grid"></div>
+        <div style="margin-top:12px;display:flex;gap:12px;font-size:var(--font-sm);color:var(--muted);align-items:center;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--red);display:inline-block"></span>今日</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--green-light);border:1px solid var(--green);display:inline-block"></span>已打卡</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--gold-light);border:1px dashed var(--gold);display:inline-block"></span>截止日</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">快捷操作</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);">
+          <button class="btn btn-primary" onclick="showTab('punch')">立即打卡认证</button>
+          <button class="btn btn-gold" onclick="tryCollect()">领取退休金</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">最近领取记录</div>
+        <div id="record-list"></div>
+      </div>
+
+      <!-- 生活缴费模块 -->
+      <div class="card">
+        <div class="card-title">生活缴费</div>
+        <div class="bill-grid">
+          <div class="bill-item" onclick="openBillDetail('水费')">
+            <div class="bill-icon">💧</div>
+            <div class="bill-text">水费</div>
+            <div class="bill-action" id="action-water">去添加</div>
+          </div>
+          <div class="bill-item" onclick="openBillDetail('电费')">
+            <div class="bill-icon">⚡</div>
+            <div class="bill-text">电费</div>
+            <div class="bill-action" id="action-electric">查看详情</div>
+          </div>
+          <div class="bill-item" onclick="openBillDetail('煤气')">
+            <div class="bill-icon">🔥</div>
+            <div class="bill-text">煤气</div>
+            <div class="bill-action" id="action-gas">去添加</div>
+          </div>
+          <div class="bill-item" onclick="openBillDetail('话费')">
+            <div class="bill-icon">📱</div>
+            <div class="bill-text">话费充值</div>
+            <div class="bill-action" id="action-phone">查看详情</div>
+          </div>
+          <div class="bill-item" onclick="openBillDetail('宽带')">
+            <div class="bill-icon">📶</div>
+            <div class="bill-text">宽带月付</div>
+            <div class="bill-action" id="action-net">去添加</div>
+          </div>
+          <div class="bill-item" onclick="openBillDetail('地铁')">
+            <div class="bill-icon">🚇</div>
+            <div class="bill-text">地铁NFC</div>
+            <div class="bill-action" id="action-subway">去添加</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PUNCH 打卡认证 -->
+    <div id="screen-punch" class="screen">
+      <div class="card">
+        <div class="card-title">每月实名打卡认证</div>
+        <div class="alert alert-danger">
+          <div class="alert-icon">🛑</div>
+          <div><b>重要提醒：</b>认证信息仅为演示使用，<b>身份证年份必须早于1960年，银行卡请填写虚假号码</b>！</div>
+        </div>
+        <div class="alert alert-info">
+          <div class="alert-icon">ℹ</div>
+          <div>打卡需在 <b>24小时内</b> 完成人脸识别。<b>10日前</b>打卡领全月；10日后按剩余天数比例发放。</div>
+        </div>
+        <div class="step-row"><div class="step-num">1</div><div class="step-text">手机号 <b>135****8821</b> 已绑定，点击下方开始认证</div></div>
+        <div class="step-row"><div class="step-num">2</div><div class="step-text">进行 <b>人脸识别</b> 确认本人在世状态（防止代领）</div></div>
+        <div class="step-row"><div class="step-num">3</div><div class="step-text">认证成功后系统自动 <b>打卡记录</b>，24小时内有效</div></div>
+        <div class="step-row"><div class="step-num">4</div><div class="step-text">跳转至 <b>领取页面</b>，点击领取到建设银行卡</div></div>
+
+        <div id="face-area">
+          <div style="width:120px;height:120px;border-radius:50%;border:2px dashed var(--border);margin:18px auto;display:flex;align-items:center;justify-content:center;background:var(--bg);">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <button class="btn btn-primary" onclick="startFace()">开始人脸识别认证</button>
+        </div>
+        <div id="face-scanning" style="display:none;text-align:center;padding:20px 0;">
+          <div class="spinner"></div>
+          <div style="font-size:var(--font-base);color:var(--muted);margin-top:14px;">人脸识别中，请正视摄像头...</div>
+        </div>
+        <div id="face-done" style="display:none;text-align:center;padding:16px 0;">
+          <div style="font-size:52px;margin-bottom:8px;">✅</div>
+          <div style="font-size:17px;font-weight:600;color:var(--green);margin-bottom:4px;">认证成功！</div>
+          <div style="font-size:var(--font-sm);color:var(--muted);margin-bottom:16px;">打卡时间：2026-05-07 14:32:18 &nbsp;<span class="verified-chip">已认证</span></div>
+          <button class="btn btn-gold" onclick="showTab('collect')">前往领取退休金 →</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">发放规则说明</div>
+        <div class="info-row"><span class="info-key">10日前打卡</span><span class="info-val green">领取全月退休金</span></div>
+        <div class="info-row"><span class="info-key">10日后打卡</span><span class="info-val">按剩余天数/月比例发放</span></div>
+        <div class="info-row"><span class="info-key">15日前未打卡</span><span class="info-val red">触发现场核查服务</span></div>
+        <div class="info-row"><span class="info-key">退休年龄（男）</span><span class="info-val">65岁+（渐进延迟）</span></div>
+        <div class="info-row"><span class="info-key">退休年龄（女）</span><span class="info-val">55岁+（渐进延迟）</span></div>
+      </div>
+    </div>
+
+    <!-- COLLECT 领取退休金 -->
+    <div id="screen-collect" class="screen">
+      <div class="card">
+        <div class="card-title">领取退休金</div>
+        <div style="text-align:center;padding:14px 0 8px;">
+          <div style="font-size:var(--font-base);color:var(--muted);margin-bottom:6px;">本月可领金额</div>
+          <div class="amount-big" id="collect-amount">¥ 3,280.00</div>
+          <div style="font-size:var(--font-sm);color:var(--muted);margin-top:8px;">10月份全月 <span class="dot"></span> 已打卡认证 <span class="dot"></span> 建行卡尾号8821</div>
+          <div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" style="width:75%"></div></div>
+          <div style="font-size:var(--font-sm);color:var(--muted);margin-top:4px;text-align:right;">缴费年限：31年 / 满年限75%</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">到账银行卡</div>
+        <div class="info-row"><span class="info-key">姓名</span><span class="info-val">请完善信息</span></div>
+        <div class="info-row"><span class="info-key">建设银行（社保卡）</span><span class="info-val">请绑定银行卡</span></div>
+        <div class="info-row"><span class="info-key">认证状态</span><span class="info-val"><span class="verified-chip">待实名认证</span></span></div>
+        <div class="info-row"><span class="info-key">打卡时间</span><span class="info-val">未打卡</span></div>
+      </div>
+
+      <div id="collect-btn-area">
+        <button class="btn btn-gold" style="font-size:16px;padding:16px;" onclick="doCollect()">确认领取 ¥3,280.00 →</button>
+        <div style="text-align:center;font-size:var(--font-sm);color:var(--muted);margin-top:10px;">点击后退休金将转入绑定银行卡（1-3个工作日到账）</div>
+      </div>
+      <div id="collect-done" style="display:none;">
+        <div class="alert alert-success">
+          <div class="alert-icon">✓</div>
+          <div><b>领取成功！</b>¥3,280.00 已申请转账，预计 1-3 个工作日到账建设银行卡。</div>
+        </div>
+        <button class="btn btn-outline" onclick="showTab('home')">返回首页</button>
+      </div>
+    </div>
+
+    <!-- PROFILE 个人中心（清空预制文案+引导填写） -->
+    <div id="screen-profile" class="screen">
+      <div class="card" style="display:flex;align-items:center;gap:14px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--red-light);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--red);flex-shrink:0;">?</div>
+        <div style="flex:1;">
+          <div style="font-size:17px;font-weight:600;color:var(--text);">请完善个人信息</div>
+          <div style="font-size:var(--font-sm);color:var(--muted);margin-top:3px;">未完善信息 &nbsp;|&nbsp; 未选择性别</div>
+          <div style="margin-top:8px;"><span class="tag tag-red">未实名认证</span> &nbsp; <span class="tag tag-gold">待完善</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">实名认证（必填）</div>
+        <div class="alert alert-info">
+          <div class="alert-icon">ℹ</div>
+          <div>请<b>填写身份证号</b>（年份<1960）、<b>选择性别</b>，完成实名认证后才能领取退休金</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">身份证号（仅演示用）</label>
+          <input type="text" id="id-card-input" class="form-input" placeholder="请输入18位身份证号，年份早于1960年">
+        </div>
+        <div class="form-group">
+          <label class="form-label">性别（必填）</label>
+          <div class="gender-row">
+            <div class="gender-btn" id="profile-gender-male" onclick="selectProfileGender('male')">男性</div>
+            <div class="gender-btn" id="profile-gender-female" onclick="selectProfileGender('female')">女性</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitProfile()">提交实名认证</button>
+      </div>
+    </div>
+
+    <!-- 退休金模拟器页面 -->
+    <div id="screen-simulator" class="screen">
+      <div class="card">
+        <div class="card-title">退休金模拟器（男女版）</div>
+        <div class="alert alert-info">
+          <div class="alert-icon">ℹ</div>
+          <div>根据性别、年龄、缴费年限计算预估退休金，<b>男性退休年龄65岁，女性55岁</b>，结果仅供参考。</div>
+        </div>
+
+        <!-- 性别选择 -->
+        <div class="form-group">
+          <div class="form-label">性别</div>
+          <div class="gender-row">
+            <div class="gender-btn selected" id="gender-male" onclick="selectGender('male')">
+              男性
+              <div class="age-hint">退休年龄 65岁</div>
+            </div>
+            <div class="gender-btn" id="gender-female" onclick="selectGender('female')">
+              女性
+              <div class="age-hint">退休年龄 55岁</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 年龄输入 -->
+        <div class="form-group">
+          <label class="form-label" for="age-input">年龄</label>
+          <input type="number" id="age-input" class="form-input" placeholder="请输入年龄（如：60）" min="18" max="80" value="65">
+        </div>
+
+        <!-- 缴费年限 -->
+        <div class="form-group">
+          <label class="form-label" for="pay-years">累计缴费年限（年）</label>
+          <input type="number" id="pay-years" class="form-input" placeholder="请输入缴费年限（如：30）" min="15" max="40" value="30">
+        </div>
+
+        <!-- 社会平均工资 -->
+        <div class="form-group">
+          <label class="form-label" for="avg-salary">当地社平工资（元/月）</label>
+          <input type="number" id="avg-salary" class="form-input" placeholder="如：8000" min="2000" max="20000" value="8000">
+        </div>
+
+        <!-- 计算按钮 -->
+        <button class="btn btn-primary" onclick="calculatePension()">计算预估退休金</button>
+      </div>
+
+      <!-- 计算结果 -->
+      <div class="simulator-result" id="simulator-result" style="display:none;">
+        <h3 id="result-title">男性 65岁 预估退休金</h3>
+        <div class="simulator-amount count-up" id="result-amount">¥ 3,120.00</div>
+        <div class="simulator-note" id="result-note">缴费30年 · 社平工资8000元 · 65岁退休</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">计算规则说明</div>
+        <div class="info-row"><span class="info-key">基础养老金</span><span class="info-val">社平工资 × (1+缴费指数) ÷ 2 × 年限 × 1%</span></div>
+        <div class="info-row"><span class="info-key">个人账户养老金</span><span class="info-val">个人账户储存额 ÷ 计发月数</span></div>
+        <div class="info-row"><span class="info-key">男性计发月数</span><span class="info-val">101个月（65岁）</span></div>
+        <div class="info-row"><span class="info-key">女性计发月数</span><span class="info-val">170个月（55岁）</span></div>
+      </div>
+    </div>
+
+    <!-- 缴费详情页面 -->
+    <div id="screen-bill-detail" class="bill-detail-screen">
+      <div class="bill-detail-header">
+        <button class="back-btn" onclick="backToHome()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="bill-detail-title" id="bill-detail-title">水费缴费</div>
+      </div>
+
+      <!-- 缴费机构选择区域 -->
+      <div class="card" id="institution-section">
+        <div class="card-title">选择缴费机构</div>
+        <div class="institution-list" id="institution-list">
+          <!-- 动态生成机构列表 -->
+        </div>
+        <button class="btn btn-primary" style="margin-top: 16px;" onclick="saveInstitution()">确认添加</button>
+      </div>
+
+      <!-- 缴费订单详情区域 -->
+      <div class="card" id="order-section" style="display: none;">
+        <div class="card-title">缴费记录</div>
+        <div class="bill-order-list" id="order-list">
+          <!-- 动态生成订单列表 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="showTab('home')">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">首页</div>
+    </div>
+    <div class="nav-item" onclick="showTab('punch')">
+      <div class="nav-icon">📝</div>
+      <div class="nav-label">打卡认证</div>
+    </div>
+    <div class="nav-item" onclick="showTab('simulator')">
+      <div class="nav-icon">🧮</div>
+      <div class="nav-label">退休金计算</div>
+    </div>
+    <div class="nav-item" onclick="showTab('profile')">
+      <div class="nav-icon">👤</div>
+      <div class="nav-label">我的</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 存储已添加的缴费机构状态
+  const billStatus = {
+    '水费': false,
+    '电费': true,
+    '煤气': false,
+    '话费': true,
+    '宽带': false,
+    '地铁': false
+  };
+
+  // 缴费机构数据
+  const institutions = {
+    '水费': ['市自来水公司', '城北供水站', '城南供水站', '城东供水站'],
+    '电费': ['国家电网', '市电力公司', '城东供电所', '城西供电所'],
+    '煤气': ['市燃气公司', '华润燃气', '中石油燃气', '中石化燃气'],
+    '话费': ['中国移动', '中国联通', '中国电信'],
+    '宽带': ['中国移动', '中国联通', '中国电信', '长城宽带'],
+    '地铁': ['地铁运营公司', '交通一卡通', '城市通卡公司']
+  };
+
+  // 缴费订单数据
+  const orders = {
+    '电费': [
+      { date: '2026-04-15', amount: 89.50, status: 'paid', desc: '2026年3月电费' },
+      { date: '2026-03-12', amount: 78.20, status: 'paid', desc: '2026年2月电费' },
+      { date: '2026-05-01', amount: 95.80, status: 'unpaid', desc: '2026年4月电费' }
+    ],
+    '话费': [
+      { date: '2026-04-20', amount: 50.00, status: 'paid', desc: '4月份话费充值' },
+      { date: '2026-03-18', amount: 100.00, status: 'paid', desc: '3月份话费充值' },
+      { date: '2026-05-05', amount: 80.00, status: 'unpaid', desc: '5月份话费充值' }
+    ]
+  };
+
+  // 登录功能核心逻辑 - 关键修复
+  function userLogin() {
+    const phoneInput = document.getElementById('login-phone');
+    const phone = phoneInput.value.trim();
+    const loginLoading = document.getElementById('login-loading');
+    const loginBtn = document.querySelector('.login-btn');
+
+    // 1. 手机号验证
+    if (!phone) {
+      alert('请输入手机号！');
+      return;
+    }
+    if (!/^1[3-9]\d{9}$/.test(phone)) {
+      alert('请输入有效的11位手机号！');
+      return;
+    }
+
+    // 2. 显示加载状态
+    loginBtn.disabled = true;
+    loginLoading.style.display = 'block';
+
+    // 3. 模拟登录请求（延迟1.5秒模拟网络请求）
+    setTimeout(() => {
+      // 关键修复1：直接控制display属性，确保登录页完全隐藏
+      const loginScreen = document.getElementById('screen-login');
+      loginScreen.style.display = 'none';
+      
+      // 关键修复2：先清空所有active状态，再添加首页的active
+      document.querySelectorAll('.screen, .bill-detail-screen').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      
+      // 显示首页
+      document.getElementById('screen-home').classList.add('active');
+      
+      // 激活底部导航首页
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      document.querySelector('.nav-item[onclick="showTab(\'home\')"]').classList.add('active');
+      
+      // 恢复按钮状态
+      loginBtn.disabled = false;
+      loginLoading.style.display = 'none';
+      
+      // 显示登录成功提示
+      showBlessBanner('登录成功！欢迎使用领了么退休金平台');
+      
+      // 生成随机弹幕
+      createDanmu(`${phone.substring(0,3)}****${phone.substring(7)} 登录成功`);
+    }, 1500);
+  }
+
+  // 显示顶部祝福横幅
+  function showBlessBanner(text) {
+    const banner = document.getElementById('bless-banner');
+    banner.textContent = text;
+    banner.style.display = 'block';
+    // 3秒后自动隐藏
+    setTimeout(() => {
+      banner.style.display = 'none';
+    }, 3000);
+  }
+
+  // 创建随机弹幕
+  function createDanmu(text) {
+    const container = document.getElementById('danmu-container');
+    const danmu = document.createElement('div');
+    danmu.className = 'danmu';
+    danmu.textContent = text;
+    // 随机垂直位置
+    const top = Math.random() * 40 + 10;
+    danmu.style.top = `${top}px`;
+    // 随机动画时长
+    const duration = Math.random() * 4 + 6;
+    danmu.style.animation = `danmuSlide ${duration}s linear forwards`;
+    container.appendChild(danmu);
+    // 动画结束后移除
+    setTimeout(() => {
+      danmu.remove();
+    }, duration * 1000);
+  }
+
+  // 切换页面标签
+  function showTab(tabName) {
+    // 隐藏所有screen
+    document.querySelectorAll('.screen, .bill-detail-screen').forEach(screen => {
+      if (screen.id !== 'screen-login') { // 排除登录页
+        screen.classList.remove('active');
+      }
+    });
+    // 显示目标screen
+    document.getElementById(`screen-${tabName}`).classList.add('active');
+    // 激活底部导航
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.querySelector(`.nav-item[onclick="showTab('${tabName}')"]`).classList.add('active');
+  }
+
+  // 打开缴费详情页面
+  function openBillDetail(type) {
+    // 隐藏所有页面
+    document.querySelectorAll('.screen, .bill-detail-screen').forEach(screen => {
+      screen.classList.remove('active');
+    });
+    
+    // 设置页面标题
+    document.getElementById('bill-detail-title').textContent = `${type}缴费`;
+    
+    // 获取机构列表容器和订单列表容器
+    const institutionList = document.getElementById('institution-list');
+    const orderList = document.getElementById('order-list');
+    const institutionSection = document.getElementById('institution-section');
+    const orderSection = document.getElementById('order-section');
+    
+    // 根据状态显示不同内容
+    if (billStatus[type]) {
+      // 已添加状态 - 显示订单详情
+      institutionSection.style.display = 'none';
+      orderSection.style.display = 'block';
+      
+      // 生成订单列表
+      let orderHtml = '';
+      const typeOrders = orders[type] || [];
+      typeOrders.forEach(order => {
+        orderHtml += `
+          <div class="bill-order-item">
+            <div class="bill-order-header">
+              <div class="bill-order-date">${order.date}</div>
+              <div class="bill-order-status ${order.status === 'paid' ? 'status-paid' : 'status-unpaid'}">
+                ${order.status === 'paid' ? '已支付' : '未支付'}
+              </div>
+            </div>
+            <div class="bill-order-amount">¥ ${order.amount.toFixed(2)}</div>
+            <div class="bill-order-desc">${order.desc}</div>
+          </div>
+        `;
+      });
+      orderList.innerHTML = orderHtml;
+    } else {
+      // 未添加状态 - 显示机构选择
+      institutionSection.style.display = 'block';
+      orderSection.style.display = 'none';
+      
+      // 生成机构列表
+      let institutionHtml = '';
+      institutions[type].forEach((inst, index) => {
+        institutionHtml += `
+          <div class="institution-item" onclick="selectInstitution(${index})">
+            <div class="institution-name">${inst}</div>
+            <div class="institution-select ${index === 0 ? 'selected' : ''}" id="inst-${index}"></div>
+          </div>
+        `;
+      });
+      institutionList.innerHTML = institutionHtml;
+    }
+    
+    // 显示缴费详情页面
+    document.getElementById('screen-bill-detail').classList.add('active');
+  }
+
+  // 返回首页
+  function backToHome() {
+    showTab('home');
+  }
+
+  // 选择缴费机构
+  let selectedInstitutionIndex = 0;
+  function selectInstitution(index) {
+    // 移除所有选中状态
+    document.querySelectorAll('.institution-select').forEach(el => {
+      el.classList.remove('selected');
+    });
+    // 添加当前选中状态
+    document.getElementById(`inst-${index}`).classList.add('selected');
+    selectedInstitutionIndex = index;
+  }
+
+  // 保存缴费机构
+  function saveInstitution() {
+    const billType = document.getElementById('bill-detail-title').textContent.replace('缴费', '');
+    // 更新状态
+    billStatus[billType] = true;
+    // 更新首页的操作文字
+    document.getElementById(`action-${billType === '水费' ? 'water' : 
+                                billType === '电费' ? 'electric' : 
+                                billType === '煤气' ? 'gas' : 
+                                billType === '话费' ? 'phone' : 
+                                billType === '宽带' ? 'net' : 'subway'}`).textContent = '查看详情';
+    // 提示成功
+    alert(`已成功添加${billType}缴费机构！`);
+    // 刷新当前页面显示订单详情
+    openBillDetail(billType);
+  }
+
+  // 敬老版/标准版切换
+  function toggleElderly(isElderly) {
+    const frame = document.getElementById('main-frame');
+    if (isElderly) {
+      frame.classList.add('elderly');
+      document.getElementById('btn-elderly').classList.add('active');
+      document.getElementById('btn-normal').classList.remove('active');
+    } else {
+      frame.classList.remove('elderly');
+      document.getElementById('btn-normal').classList.add('active');
+      document.getElementById('btn-elderly').classList.remove('active');
+    }
+  }
+
+  // 人脸识别认证
+  function startFace() {
+    document.getElementById('face-area').style.display = 'none';
+    document.getElementById('face-scanning').style.display = 'block';
+    // 模拟人脸识别（2秒后完成）
+    setTimeout(() => {
+      document.getElementById('face-scanning').style.display = 'none';
+      document.getElementById('face-done').style.display = 'block';
+    }, 2000);
+  }
+
+  // 领取退休金
+  function doCollect() {
+    document.getElementById('collect-btn-area').style.display = 'none';
+    document.getElementById('collect-done').style.display = 'block';
+    // 触发庆祝动画（示例）
+    const celebration = document.createElement('div');
+    celebration.className = 'celebration-container active';
+    document.body.appendChild(celebration);
+    // 生成金币动画
+    for (let i = 0; i < 20; i++) {
+      setTimeout(() => {
+        const coin = document.createElement('div');
+        coin.className = 'coin';
+        coin.style.left = `${Math.random() * 100}%`;
+        coin.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        celebration.appendChild(coin);
+        setTimeout(() => coin.remove(), 5000);
+      }, i * 100);
+    }
+    // 3秒后移除庆祝容器
+    setTimeout(() => {
+      celebration.remove();
+    }, 5000);
+  }
+
+  // 退休金模拟器 - 选择性别
+  function selectGender(gender) {
+    const maleBtn = document.getElementById('gender-male');
+    const femaleBtn = document.getElementById('gender-female');
+    if (gender === 'male') {
+      maleBtn.classList.add('selected');
+      femaleBtn.classList.remove('selected');
+    } else {
+      femaleBtn.classList.add('selected');
+      maleBtn.classList.remove('selected');
+    }
+  }
+
+  // 个人中心 - 选择性别
+  function selectProfileGender(gender) {
+    const maleBtn = document.getElementById('profile-gender-male');
+    const femaleBtn = document.getElementById('profile-gender-female');
+    if (gender === 'male') {
+      maleBtn.classList.add('selected');
+      femaleBtn.classList.remove('selected');
+    } else {
+      femaleBtn.classList.add('selected');
+      maleBtn.classList.remove('selected');
+    }
+  }
+
+  // 提交个人信息
+  function submitProfile() {
+    const idCard = document.getElementById('id-card-input').value.trim();
+    const maleSelected = document.getElementById('profile-gender-male').classList.contains('selected');
+    const femaleSelected = document.getElementById('profile-gender-female').classList.contains('selected');
+    
+    if (!idCard) {
+      alert('请输入身份证号！');
+      return;
+    }
+    
+    if (idCard.length !== 18) {
+      alert('请输入18位身份证号！');
+      return;
+    }
+    
+    const birthYear = parseInt(idCard.substring(6, 10));
+    if (birthYear >= 1960) {
+      alert('身份证年份必须早于1960年！');
+      return;
+    }
+    
+    if (!maleSelected && !femaleSelected) {
+      alert('请选择性别！');
+      return;
+    }
+    
+    alert('实名认证提交成功！（演示用）');
+    // 可以在这里添加跳转到领取页面的逻辑
+  }
+
+  // 计算预估退休金
+  function calculatePension() {
+    const gender = document.getElementById('gender-male').classList.contains('selected') ? 'male' : 'female';
+    const age = parseInt(document.getElementById('age-input').value);
+    const payYears = parseInt(document.getElementById('pay-years').value);
+    const avgSalary = parseInt(document.getElementById('avg-salary').value);
+
+    // 基础养老金 = 社平工资 × (1+缴费指数) ÷ 2 × 年限 × 1% （缴费指数默认取1）
+    const basicPension = avgSalary * (1 + 1) / 2 * payYears * 0.01;
+    // 个人账户养老金 = 社平工资 × 8% × 12 × 年限 ÷ 计发月数
+    const accountPension = (avgSalary * 0.08 * 12 * payYears) / (gender === 'male' ? 101 : 170);
+    // 总退休金
+    const totalPension = Math.round(basicPension + accountPension);
+
+    // 显示结果
+    const resultTitle = document.getElementById('result-title');
+    const resultAmount = document.getElementById('result-amount');
+    const resultNote = document.getElementById('result-note');
+    
+    resultTitle.textContent = `${gender === 'male' ? '男性' : '女性'} ${age}岁 预估退休金`;
+    resultAmount.textContent = `¥ ${totalPension.toLocaleString()}.00`;
+    resultNote.textContent = `缴费${payYears}年 · 社平工资${avgSalary}元 · ${gender === 'male' ? '65岁' : '55岁'}退休`;
+    
+    document.getElementById('simulator-result').style.display = 'block';
+  }
+
+  // 生活缴费
+  function billPay(type) {
+    alert(`您选择了${type}缴费，本功能为演示用，暂未开通！`);
+  }
+
+  // 月份切换（示例）
+  function prevMonth() {
+    alert('已切换到上一个月（演示）');
+  }
+  function nextMonth() {
+    alert('已切换到下一个月（演示）');
+  }
+
+  // 通知提示
+  function showNotif() {
+    alert('您有1条新通知：本月退休金已可领取，请尽快完成打卡认证！');
+  }
+
+  // 初始化日历（修正2026年5月1日为周五）
+  window.onload = function() {
+    const calGrid = document.getElementById('cal-grid');
+    calGrid.innerHTML = ''; // 清空原有内容
+    
+    // 2026年5月1日是周五，所以日历开始前需要填充4个空白天（一、二、三、四）
+    for (let i = 0; i < 4; i++) {
+      const emptyDay = document.createElement('div');
+      emptyDay.className = 'cal-day';
+      emptyDay.style.visibility = 'hidden';
+      calGrid.appendChild(emptyDay);
+    }
+    
+    // 生成5月的日期（1-31日）
+    for (let i = 1; i <= 31; i++) {
+      const day = document.createElement('div');
+      day.className = 'cal-day';
+      day.textContent = i;
+      
+      // 标记5月1日（周五）
+      if (i === 1) {
+        day.style.fontWeight = '700';
+        day.style.color = 'var(--red)';
+      }
+      
+      // 标记今日（7号）
+      if (i === 7) day.classList.add('today');
+      // 标记已打卡（1-6号）
+      if (i < 7) day.classList.add('done');
+      // 标记截止日（10号）
+      if (i === 10) day.classList.add('deadline');
+      // 未来日期
+      if (i > 7) day.classList.add('future');
+      
+      calGrid.appendChild(day);
+    }
+    
+    // 初始化领取记录
+    const recordList = document.getElementById('record-list');
+    recordList.innerHTML = `
+      <div class="info-row"><span class="info-key">2026-04-10</span><span class="info-val green">¥3,280.00 已到账</span></div>
+      <div class="info-row"><span class="info-key">2026-03-10</span><span class="info-val green">¥3,280.00 已到账</span></div>
+      <div class="info-row"><span class="info-key">2026-02-08</span><span class="info-val green">¥3,150.00 已到账</span></div>
+    `;
+  };
+</script>
+</body>
+</html>
